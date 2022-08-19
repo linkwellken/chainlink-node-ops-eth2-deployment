@@ -7,14 +7,68 @@ Short guide to deploy an ETH 2.0 full node with the execution client and consens
 
 ### Enable Firewall Rules
 Inbound
-- 
+#SSH 10.0.0.0/16
+- 6001 
+# EC P2P 0.0.0.0
+- 30303
+# CC P2P 0.0.0.0
+- 9000
+
+### Create User
+```
+sudo su root
+adduser linkwelladmin
+usermod -aG sudo <yourusername>
+su linkwelladmin
+```
+
+### Update instance
+```
+sudo yum update
+```
+
+### Modify default SSH port
+```
+sudo nano /etc/ssh/sshd_config
+Port 6001
+sudo systemctl restart ssh
+```
+
+### Modify swap space
+```
+#Create swap space
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+# Modify to persist after reboot
+sudo cp /etc/fstab /etc/fstab.bak
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+# Configure swap space
+sudo sysctl vm.swappiness=10
+sudo sysctl vm.vfs_cache_pressure=50
+# Modify swap file
+sudo nano /etc/sysctl.conf
+# Add
+vm.swappiness=10
+vm.vfs_cache_pressure = 50
+```
+
+### Timezone change or leave as at UTC?
+
+### Mount volume
+```
+
+```
 
 ### Install docker and docker-compose
+```
 sudo amazon-linux-extras install -y docker
 sudo systemctl start docker
 sudo gpasswd -a $USER docker
 exit
 # log in again
+```
 
 
 ### Create JWT
@@ -41,12 +95,20 @@ exit
 ```
 ---
 version: '3.4'
+x-logging:
+  &default-logging
+  driver: "fluentd"
+x-log-opts:
+  &log-opts
+
+  tag: "{{.Name}}-{{.ID}}"
+
 services:
 
   besu_node:
     image: hyperledger/besu:latest
+    container_name: besu
     command: ["--network=goerli",
-              "--name besu",
               "--restart always",
               "--user 1001:1001",
               "--data-storage-format=BONSAI",
@@ -68,6 +130,7 @@ services:
       - "JAVA_OPTS=-Xmx4g"
       - "TEKU_OPTS=-XX:-HeapDumpOnOutOfMemoryError"
     image: consensys/teku:latest
+    container_name: teku
     command: ["--network=goerli",
               "--name teku",
               "--restart always",
