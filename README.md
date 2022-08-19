@@ -10,10 +10,19 @@ Short guide to deploy an ETH 2.0 full node with the execution client and consens
 Inbound
 #SSH 10.0.0.0/16
 - 6001 
+
 # EC P2P 0.0.0.0
-- 30303
+- 30303 tcp/udp
+
+# EC JSON-RPC Inbound from Chainlink security group and possibly Splunk security group
+- 8545 - http port
+- 8546 - ws port
+
 # CC P2P 0.0.0.0
-- 9000
+- 9000 tcp/udp
+
+# Fluentd localhost
+- 24224 
 ```
 
 ### Create User
@@ -56,12 +65,7 @@ vm.swappiness=10
 vm.vfs_cache_pressure = 50
 ```
 
-### Timezone change or leave as at UTC?
-
-### Mount volume
-```
-
-```
+### Mount volume if needed
 
 ### Install docker and docker-compose
 ```
@@ -70,6 +74,9 @@ sudo systemctl start docker
 sudo gpasswd -a $USER docker
 exit
 # log in again
+sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+sudo cp /usr/local/bin/docker-compose /usr/bin
+sudo chmod +x /usr/bin/docker-compose
 ```
 
 
@@ -104,26 +111,31 @@ x-log-opts:
   &log-opts
   fluentd-address: "localhost:24224"
   tag: "{{.Name}}-{{.ID}}"
-
 services:
-
   besu_node:
     image: hyperledger/besu:latest
     container_name: besu
+    user: 1001:1001
+    restart: always
     command: ["--network=goerli",
-              "--restart always",
-              "--user 1001:1001",
               "--data-storage-format=BONSAI",
               "--data-path=/var/lib/besu,"
               "--host-allowlist=*",
               "--sync-mode=X_SNAP",
               "--engine-rpc-enabled=true",
-              "--engine-jwt-secret=/var/lib/jwtsecret/jwt.hex"]
+              "--engine-jwt-secret=/var/lib/jwtsecret/jwt.hex",
+              "--rpc-http-enabled",
+              "--rpc-ws-enabled",
+              "--rpc-ws-port=8546",
+              "--rpc-ws-host=0.0.0.0",
+              "--rpc-http-port=8545",
+              "--rpc-http-host=0.0.0.0"]
     volumes:
       - ./besu:/var/lib/teku
     ports:
       # Map the p2p port(30303) and RPC HTTP port(8545)
       - "8545:8545"
+      - "8546::8546"
       - "30303:30303/tcp"
       - "30303:30303/udp"
 
@@ -133,17 +145,14 @@ services:
       - "TEKU_OPTS=-XX:-HeapDumpOnOutOfMemoryError"
     image: consensys/teku:latest
     container_name: teku
+    user: 1001:1001
+    restart: always
     command: ["--network=goerli",
-              "--name teku",
-              "--restart always",
-              "--user 1001:1001",
               "--data-path=/var/lib/teku"
               "--ee-endpoint=http://localhost:8545",
               "--initial-state=https://goerli.checkpoint-sync.ethdevops.io/eth/v2/debug/beacon/states/finalized",
               "--ee-jwt-secret-file=/var/lib/jwtsecret/jwt.hex",
-#              "--p2p-port=9000",
-#              "--rest-api-enabled=true",
-#              "--rest-api-docs-enabled=true"]
+              "--p2p-port=9000"]
     depends_on:
       - besu_node
     volumes:
@@ -152,5 +161,4 @@ services:
       # Map the p2p port(9000) and REST API port(5051)
       - "9000:9000/tcp"
       - "9000:9000/udp"
-      - "5051:5051"
 ```
