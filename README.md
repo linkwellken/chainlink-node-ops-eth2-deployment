@@ -102,7 +102,7 @@ x-logging:
   driver: "fluentd"
 x-log-opts:
   &log-opts
-
+  fluentd-address: "localhost:24224"
   tag: "{{.Name}}-{{.ID}}"
 
 services:
