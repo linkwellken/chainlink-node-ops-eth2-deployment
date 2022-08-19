@@ -6,6 +6,7 @@ Short guide to deploy an ETH 2.0 full node with the execution client and consens
 * https://someresat.medium.com/guide-to-staking-on-ethereum-ubuntu-g%C3%B6erli-teku-6512b26f1372
 
 ### Enable Firewall Rules
+```
 Inbound
 #SSH 10.0.0.0/16
 - 6001 
@@ -13,6 +14,7 @@ Inbound
 - 30303
 # CC P2P 0.0.0.0
 - 9000
+```
 
 ### Create User
 ```
