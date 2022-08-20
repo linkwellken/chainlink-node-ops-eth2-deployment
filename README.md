@@ -138,7 +138,7 @@ services:
     restart: always
     command: ["--network=goerli",
               "--data-storage-format=BONSAI",
-              "--data-path=/lw/data/besu,"
+              "--data-path=/lw/data/besu",
               "--host-allowlist=*",
               "--sync-mode=X_SNAP",
               "--engine-rpc-enabled=true",
@@ -170,7 +170,7 @@ services:
     user: 1004:1004
     restart: always
     command: ["--network=goerli",
-              "--data-path=/lw/data/teku"
+              "--data-path=/lw/data/teku",
               "--ee-endpoint=http://localhost:8551",
               "--initial-state=https://goerli.checkpoint-sync.ethdevops.io/eth/v2/debug/beacon/states/finalized",
               "--ee-jwt-secret-file=/lw/data/jwtsecret/jwt.hex",
