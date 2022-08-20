@@ -4,6 +4,7 @@ Short guide to deploy an ETH 2.0 full node with the execution client and consens
 ### Resources
 * https://docs.teku.consensys.net/en/latest/HowTo/Get-Started/Installation-Options/Run-Docker-Image/
 * https://someresat.medium.com/guide-to-staking-on-ethereum-ubuntu-g%C3%B6erli-teku-6512b26f1372
+* https://hackmd.io/bF0kygj4S92fmuZNRQXuSw?view
 
 ### Enable Firewall Rules
 ```
