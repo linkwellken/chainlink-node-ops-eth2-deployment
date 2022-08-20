@@ -69,7 +69,35 @@ vm.swappiness=10
 vm.vfs_cache_pressure = 50
 ```
 
-### Mount volume if needed
+### Mount volume 
+```
+1. sudo file -s /dev/<volume>
+2. sudo mkfs -t xfs /dev/xvdf
+3. sudo lsblk -f
+4. sudo mount /dev/sdb /lw/data
+## Persist volume
+5. sudo cp /etc/fstab /etc/fstab.orig
+6. sudo blkid
+7. sudo vim /etc/fstab
+8. UUID=5ab375d1-334f-4ed9-bfcc-a628eb3ff14c       /lw/data        xfs     defaults,nofail  0  2
+```
+
+### Besu pre-setup
+```
+sudo groupadd node
+sudo useradd --no-create-home --shell /bin/false besu
+sudo mkdir -p /lw/data/besu
+sudo chown -R besu:besu /lw/data/besu
+sudo gpasswd -a besu node
+```
+
+### Teku pre-setup
+```
+1. sudo useradd --no-create-home --shell /bin/false teku
+2. sudo mkdir -p /lw/data/teku
+3. sudo chown -R teku:teku /lw/data/teku
+sudo gpasswd -a teku node
+```
 
 ### Install docker and docker-compose
 ```
@@ -83,25 +111,12 @@ sudo cp /usr/local/bin/docker-compose /usr/bin
 sudo chmod +x /usr/bin/docker-compose
 ```
 
-
 ### Create JWT
 ```
-1. sudo mkdir -p /var/lib/jwtsecret
-2. openssl rand -hex 32 | sudo tee /var/lib/jwtsecret/jwt.hex > /dev/null
-```
-
-### Besu pre-setup
-```
-1. sudo useradd --no-create-home --shell /bin/false besu
-2. sudo mkdir -p /var/lib/besu
-3. sudo chown -R besu:besu /var/lib/besu
-```
-
-### Teku pre-setup
-```
-1. sudo useradd --no-create-home --shell /bin/false teku
-2. sudo mkdir -p /var/lib/teku
-3. sudo chown -R teku:teku /var/lib/teku
+sudo mkdir -p /lw/data/jwtsecret
+openssl rand -hex 32 | sudo tee /lw/data/jwtsecret/jwt.hex > /dev/null
+sudo chown -R linkwelladmin:node /lw/data/jwtsecret
+sudo chmod -R 770 /lw/data/jwtsecret
 ```
 
 ### Docker-compose
@@ -119,17 +134,17 @@ services:
   besu_node:
     image: hyperledger/besu:latest
     container_name: besu
-    user: 1001:1001
+    user: 1003:1003
     restart: always
     command: ["--network=goerli",
               "--data-storage-format=BONSAI",
-              "--data-path=/var/lib/besu,"
+              "--data-path=/lw/data/besu,"
               "--host-allowlist=*",
               "--sync-mode=X_SNAP",
               "--engine-rpc-enabled=true",
               "--engine-host-allowlist=localhost",
               "--engine-rpc-port=8551",
-              "--engine-jwt-secret=/var/lib/jwtsecret/jwt.hex",
+              "--engine-jwt-secret=/lw/data/jwtsecret/jwt.hex",
               "--rpc-http-enabled",
               "--rpc-ws-enabled",
               "--rpc-ws-port=8546",
@@ -137,7 +152,7 @@ services:
               "--rpc-http-port=8545",
               "--rpc-http-host=0.0.0.0"]
     volumes:
-      - ./besu:/var/lib/besu
+      - ./besu:/lw/data/besu
     ports:
       # Map the p2p port(30303) and RPC HTTP port(8545)
       - "8545:8545"
@@ -152,18 +167,18 @@ services:
       - "TEKU_OPTS=-XX:-HeapDumpOnOutOfMemoryError"
     image: consensys/teku:latest
     container_name: teku
-    user: 1001:1001
+    user: 1004:1004
     restart: always
     command: ["--network=goerli",
-              "--data-path=/var/lib/teku"
+              "--data-path=/lw/data/teku"
               "--ee-endpoint=http://localhost:8551",
               "--initial-state=https://goerli.checkpoint-sync.ethdevops.io/eth/v2/debug/beacon/states/finalized",
-              "--ee-jwt-secret-file=/var/lib/jwtsecret/jwt.hex",
+              "--ee-jwt-secret-file=/lw/data/jwtsecret/jwt.hex",
               "--p2p-port=9000"]
     depends_on:
       - besu_node
     volumes:
-      - ./teku:/var/lib/teku
+      - ./teku:/lw/data/teku
     ports:
       # Map the p2p port(9000) and REST API port(5051)
       - "9000:9000/tcp"
