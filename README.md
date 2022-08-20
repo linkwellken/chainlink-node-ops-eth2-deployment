@@ -22,7 +22,7 @@ Inbound
 # CC P2P 0.0.0.0
 - 9000 tcp/udp
 
-# CC Engine API (comms port between EC and CC) <node sg>
+# EC Engine API (comms port between EC and CC) <node sg>
 - 8551 http & ws port / tcp
 
 # Fluentd <node sg>
