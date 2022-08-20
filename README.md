@@ -136,7 +136,7 @@ services:
               "--rpc-http-port=8545",
               "--rpc-http-host=0.0.0.0"]
     volumes:
-      - ./besu:/var/lib/teku
+      - ./besu:/var/lib/besu
     ports:
       # Map the p2p port(30303) and RPC HTTP port(8545)
       - "8545:8545"
