@@ -15,14 +15,17 @@ Inbound
 - 30303 tcp/udp
 
 # EC JSON-RPC Inbound from Chainlink security group and possibly Splunk security group
-- 8545 - http port
-- 8546 - ws port
+- 8545 - http port / tcp
+- 8546 - ws port / tcp
 
 # CC P2P 0.0.0.0
 - 9000 tcp/udp
 
-# Fluentd localhost
-- 24224 
+# CC Engine API (comms port between EC and CC) <node sg>
+- 8551 http & ws port / tcp
+
+# Fluentd <node sg>
+- 24224 tcp
 ```
 
 ### Create User
@@ -123,6 +126,8 @@ services:
               "--host-allowlist=*",
               "--sync-mode=X_SNAP",
               "--engine-rpc-enabled=true",
+              "--engine-host-allowlist=localhost",
+              "--engine-rpc-port=8551",
               "--engine-jwt-secret=/var/lib/jwtsecret/jwt.hex",
               "--rpc-http-enabled",
               "--rpc-ws-enabled",
@@ -135,7 +140,8 @@ services:
     ports:
       # Map the p2p port(30303) and RPC HTTP port(8545)
       - "8545:8545"
-      - "8546::8546"
+      - "8546:8546"
+      - "8551:8551"
       - "30303:30303/tcp"
       - "30303:30303/udp"
 
@@ -149,7 +155,7 @@ services:
     restart: always
     command: ["--network=goerli",
               "--data-path=/var/lib/teku"
-              "--ee-endpoint=http://localhost:8545",
+              "--ee-endpoint=http://localhost:8551",
               "--initial-state=https://goerli.checkpoint-sync.ethdevops.io/eth/v2/debug/beacon/states/finalized",
               "--ee-jwt-secret-file=/var/lib/jwtsecret/jwt.hex",
               "--p2p-port=9000"]
