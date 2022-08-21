@@ -7,6 +7,7 @@ Short guide to deploy an ETH 2.0 full node with the besu execution client and te
 * https://hackmd.io/bF0kygj4S92fmuZNRQXuSw?view
 
 ### Enable AWS EC2 Security Group Rules
+```
 Inbound
 #SSH 
 - 6001 from <your ip>
@@ -26,6 +27,7 @@ Inbound
 
 # Fluentd 
 - 24224 tcp from local security group
+```
 
 ### Create User
 ```
