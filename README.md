@@ -1,5 +1,5 @@
 # ETH 2.0 Full Node deployment using teku and besu
-Short guide to deploy an ETH 2.0 full node with the besu execution client and teku consensus client on a single t3.xlarge EC2 instance in AWS using docker-compose.  
+Short guide to deploy an ETH 2.0 full node with the besu execution client and teku consensus client on a single t3.xlarge EC2 instance in AWS using docker-compose. This guide is primarily for deploying full ETH 2.0 nodes for the use of Chainlink nodes, and does not include the validator client for staking.
 
 ### Resources
 * https://docs.teku.consensys.net/en/latest/HowTo/Get-Started/Installation-Options/Run-Docker-Image/
@@ -9,32 +9,33 @@ Short guide to deploy an ETH 2.0 full node with the besu execution client and te
 ### Enable Firewall Rules
 ```
 Inbound
-#SSH 10.0.0.0/16
-- 6001 
+#SSH 
+- 6001 from <your ip>
 
-# EC P2P 0.0.0.0
-- 30303 tcp/udp
+# EL P2P 
+- 30303 tcp/udp from 0.0.0.0
 
-# EC JSON-RPC Inbound from Chainlink security group and possibly Splunk security group
-- 8545 - http port / tcp
-- 8546 - ws port / tcp
+# EL JSON-RPC 
+- 8545 - http port / tcp from Chainlink security group and optionally Splunk security group
+- 8546 - ws port / tcp from Chainlink security group and optionally Splunk security group
 
-# CC P2P 0.0.0.0
-- 9000 tcp/udp
+# EL Engine API (comms port between EC and CC) 
+- 8551 http & ws port / tcp from local security group
 
-# EC Engine API (comms port between EC and CC) <node sg>
-- 8551 http & ws port / tcp
+# CL P2P 
+- 9000 tcp/udp from 0.0.0.0
 
-# Fluentd <node sg>
-- 24224 tcp
+# Fluentd 
+- 24224 tcp from local security group
 ```
 
 ### Create User
 ```
 sudo su root
-adduser linkwelladmin
-usermod -aG sudo <yourusername>
-su linkwelladmin
+adduser <user>
+visudo
+<add your user and permissions to file>
+su <user>
 ```
 
 ### Update instance
@@ -79,7 +80,7 @@ vm.vfs_cache_pressure = 50
 5. sudo cp /etc/fstab /etc/fstab.orig
 6. sudo blkid
 7. sudo vim /etc/fstab
-8. UUID=5ab375d1-334f-4ed9-bfcc-a628eb3ff14c       /lw/data        xfs     defaults,nofail  0  2
+8. UUID=<volume id>       /lw/data        xfs     defaults,nofail  0  2
 ```
 
 ### Besu pre-setup
