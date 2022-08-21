@@ -131,13 +131,13 @@ services:
     restart: always
     command: ["--network=goerli",
               "--data-storage-format=BONSAI",
-              "--data-path=/lw/data/besu",
+              "--data-path=/var/lib/besu",
               "--host-allowlist=*",
               "--sync-mode=X_SNAP",
               "--engine-rpc-enabled=true",
-              "--engine-host-allowlist=localhost,127.0.0.1",
+              "--engine-host-allowlist=*,
               "--engine-rpc-port=8551",
-              "--engine-jwt-secret=/lw/data/jwtsecret/jwt.hex",
+              "--engine-jwt-secret=/var/lib/jwtsecret/jwt.hex",
               "--rpc-http-enabled",
               "--rpc-ws-enabled",
               "--rpc-ws-port=8546",
@@ -145,8 +145,8 @@ services:
               "--rpc-http-port=8545",
               "--rpc-http-host=0.0.0.0"]
     volumes:
-      - ./besu:/lw/data/besu
-      - ./besu:/
+      - ./besu:/var/lib/besu
+      - /lw/data/jwtsecret/jwt.hex:/var/lib/jwtsecret/jwt.hex
     ports:
       # Map the p2p port(30303) and RPC HTTP port(8545)
       - "8545:8545"
@@ -168,15 +168,15 @@ services:
     user: 1004:1004
     restart: always
     command: ["--network=goerli",
-              "--data-path=/lw/data/teku",
+              "--data-path=/var/lib/teku",
               "--ee-endpoint=http://localhost:8551",
               "--initial-state=https://goerli.checkpoint-sync.ethdevops.io/eth/v2/debug/beacon/states/finalized",
-              "--ee-jwt-secret-file=/lw/data/jwtsecret/jwt.hex",
+              "--ee-jwt-secret-file=/var/lib/jwtsecret/jwt.hex",
               "--p2p-port=9000"]
     depends_on:
       - besu_node
     volumes:
-      - ./teku:/lw/data/teku
+      - ./teku:/var/lib/teku
     ports:
       # Map the p2p port(9000) and REST API port(5051)
       - "9000:9000/tcp"
