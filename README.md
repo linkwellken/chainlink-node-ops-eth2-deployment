@@ -123,13 +123,6 @@ sudo chmod -R 770 /lw/data/jwtsecret
 ```
 ---
 version: '3.4'
-x-logging:
-  &default-logging
-  driver: "fluentd"
-x-log-opts:
-  &log-opts
-  fluentd-address: "localhost:24224"
-  tag: "{{.Name}}-{{.ID}}"
 services:
   besu_node:
     image: hyperledger/besu:latest
@@ -142,7 +135,7 @@ services:
               "--host-allowlist=*",
               "--sync-mode=X_SNAP",
               "--engine-rpc-enabled=true",
-              "--engine-host-allowlist=localhost",
+              "--engine-host-allowlist=localhost,127.0.0.1",
               "--engine-rpc-port=8551",
               "--engine-jwt-secret=/lw/data/jwtsecret/jwt.hex",
               "--rpc-http-enabled",
@@ -153,6 +146,7 @@ services:
               "--rpc-http-host=0.0.0.0"]
     volumes:
       - ./besu:/lw/data/besu
+      - ./besu:/
     ports:
       # Map the p2p port(30303) and RPC HTTP port(8545)
       - "8545:8545"
@@ -160,6 +154,10 @@ services:
       - "8551:8551"
       - "30303:30303/tcp"
       - "30303:30303/udp"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
 
   teku_node:
     environment:
@@ -183,4 +181,8 @@ services:
       # Map the p2p port(9000) and REST API port(5051)
       - "9000:9000/tcp"
       - "9000:9000/udp"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
 ```
