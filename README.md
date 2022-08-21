@@ -1,5 +1,5 @@
-# ETH-Full-Node-Deployment
-Short guide to deploy an ETH 2.0 full node with the besu execution client and teku consensus client on a single t3.xlarge EC2 instance in AWS using docker-compose.
+# ETH 2.0 Full Node deployment using teku and besu
+Short guide to deploy an ETH 2.0 full node with the besu execution client and teku consensus client on a single t3.xlarge EC2 instance in AWS using docker-compose.  
 
 ### Resources
 * https://docs.teku.consensys.net/en/latest/HowTo/Get-Started/Installation-Options/Run-Docker-Image/
