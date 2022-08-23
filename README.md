@@ -123,7 +123,7 @@ sudo chmod -R 770 jwtsecret
 ### Docker-compose
 ```
 git clone https://github.com/linkwellken/ETH-Full-Node-Deployment.git
-docker-compose up -d
 cd ETH-Full-Node-Deployment
 cp docker-compose.yaml ..
+docker-compose up -d
 ```
