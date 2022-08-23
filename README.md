@@ -9,7 +9,7 @@ Short guide to deploy an ETH 2.0 full node with the besu execution client and te
 ### Enable AWS EC2 Security Group Rules
 ```
 Inbound
-#SSH 
+#SSH (Optional)
 - 6001 from <your ip>
 
 # EL P2P 
@@ -43,7 +43,7 @@ su <user>
 sudo yum update
 ```
 
-### Modify default SSH port
+### Modify default SSH port (Optional)
 ```
 sudo nano /etc/ssh/sshd_config
 Port 6001
@@ -94,9 +94,9 @@ sudo gpasswd -a besu node
 
 ### Teku pre-setup
 ```
-1. sudo useradd --no-create-home --shell /bin/false teku
-2. sudo mkdir -p /lw/data/teku
-3. sudo chown -R teku:teku /lw/data/teku
+sudo useradd --no-create-home --shell /bin/false teku
+sudo mkdir -p /lw/data/teku
+sudo chown -R teku:teku /lw/data/teku
 sudo gpasswd -a teku node
 ```
 
@@ -124,4 +124,6 @@ sudo chmod -R 770 jwtsecret
 ```
 git clone https://github.com/linkwellken/ETH-Full-Node-Deployment.git
 docker-compose up -d
+cd ETH-Full-Node-Deployment
+cp docker-compose.yaml ..
 ```
