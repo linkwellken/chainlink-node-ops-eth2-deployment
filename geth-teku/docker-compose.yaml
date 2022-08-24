@@ -4,29 +4,32 @@ services:
   geth_node:
     image: ethereum/client-go:latest
     container_name: geth
-    user: 1003:1003
-    restart: always
-    command: ["--goerli",
-              "--datadir /lw/data/geth",
-              "--syncmode snap",
-              "--allow-insecure-unlock",
-              "--authrpc.port 8551",
-              "--authrpc.addr localhost",
-              "--authrpc.jwtsecret jwtsecret",
-              "--ws",
-              "--ws.port 8546",
-              "--ws.addr 0.0.0.0",
-              "--ws.origins *",
-              "--ws.api personal,admin,db,eth,net,web3,miner,shh,txpool,debug",
-              "--http",
-              "--http.port 8545",
-              "--http-addr 0.0.0.0",
-              "--http.vhosts *",
-              "--http.api personal,admin,db,eth,net,web3,miner,shh,txpool,debug",
-              "--rpc.txfeecap 0",
-              "--rpc.gascap 0",
-              "--ipcdisable",
-              "--maxpeers 20"]
+    user: root:root
+    restart: unless-stopped
+    stop_signal: SIGINT
+    stop_grace_period: 2m
+    command:
+      - --goerli
+      - --datadir=/lw/data/geth
+      - --syncmode=snap
+      - --allow-insecure-unlock
+      - --authrpc.port=8551
+      - --authrpc.addr=localhost
+      - --authrpc.jwtsecret=jwtsecret
+      - --ws
+      - --ws.port=8546
+      - --ws.addr=0.0.0.0
+      - --ws.origins=*
+      - --ws.api=personal,admin,eth,net,web3,miner,txpool,debug
+      - --http
+      - --http.port=8545
+      - --http.addr=0.0.0.0
+      - --http.vhosts=*
+      - --http.api=personal,admin,eth,net,web3,miner,txpool,debug
+      - --rpc.txfeecap=0
+      - --rpc.gascap=0
+      - --ipcdisable
+      - --maxpeers=20
     volumes:
       - ./geth:/lw/data/geth
       - /lw/data/jwtsecret:/opt/geth/jwtsecret
