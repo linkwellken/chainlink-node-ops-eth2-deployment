@@ -15,6 +15,7 @@ services:
       - --allow-insecure-unlock
       - --authrpc.port=8551
       - --authrpc.addr=localhost
+      - --authrpc.vhosts=localhost
       - --authrpc.jwtsecret=jwtsecret
       - --ws
       - --ws.port=8546
@@ -25,6 +26,7 @@ services:
       - --http.port=8545
       - --http.addr=0.0.0.0
       - --http.vhosts=*
+      - --http.corsdomain=*
       - --http.api=personal,admin,eth,net,web3,miner,txpool,debug
       - --rpc.txfeecap=0
       - --rpc.gascap=0
@@ -32,13 +34,14 @@ services:
       - --maxpeers=20
     volumes:
       - ./geth:/lw/data/geth
-      - /lw/data/jwtsecret:/opt/geth/jwtsecret
+      - /lw/data/jwtsecret:/jwtsecret
     ports:
       - "8545:8545"
       - "8546:8546"
       - "8551:8551"
       - "30303:30303/tcp"
       - "30303:30303/udp"
+    network_mode: host
     logging:
       driver: fluentd
       options:
@@ -54,7 +57,7 @@ services:
     restart: always
     command: ["--network=goerli",
               "--data-path=/lw/data/teku",
-              "--ee-endpoint=http://geth_node:8551",
+              "--ee-endpoint=http://localhost:8551",
               "--initial-state=https://goerli.checkpoint-sync.ethdevops.io/eth/v2/debug/beacon/states/finalized",
               "--ee-jwt-secret-file=jwtsecret",
               "--p2p-port=9000"]
@@ -67,6 +70,7 @@ services:
       # Map the p2p port(9000) and REST API port(5051)
       - "9000:9000/tcp"
       - "9000:9000/udp"
+    network_mode: host
     logging:
       driver: fluentd
       options:
