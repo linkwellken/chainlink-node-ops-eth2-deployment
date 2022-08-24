@@ -1,0 +1,70 @@
+---
+version: '3.4'
+services:
+  geth_node:
+    image: ethereum/client-go:latest
+    container_name: geth
+    user: 1003:1003
+    restart: always
+    command: ["--goerli",
+              "--datadir /lw/data/geth",
+              "--syncmode snap",
+              "--allow-insecure-unlock",
+              "--authrpc.port 8551",
+              "--authrpc.addr localhost",
+              "--authrpc.jwtsecret jwtsecret",
+              "--ws",
+              "--ws.port 8546",
+              "--ws.addr 0.0.0.0",
+              "--ws.origins *",
+              "--ws.api personal,admin,db,eth,net,web3,miner,shh,txpool,debug",
+              "--http",
+              "--http.port 8545",
+              "--http-addr 0.0.0.0",
+              "--http.vhosts *",
+              "--http.api personal,admin,db,eth,net,web3,miner,shh,txpool,debug",
+              "--rpc.txfeecap 0",
+              "--rpc.gascap 0",
+              "--ipcdisable",
+              "--maxpeers 20"]
+    volumes:
+      - ./geth:/lw/data/geth
+      - /lw/data/jwtsecret:/opt/geth/jwtsecret
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+      - "8551:8551"
+      - "30303:30303/tcp"
+      - "30303:30303/udp"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+
+  teku_node:
+    environment:
+      - "JAVA_OPTS=-Xmx4g"
+      - "TEKU_OPTS=-XX:-HeapDumpOnOutOfMemoryError"
+    image: consensys/teku:latest
+    container_name: teku
+    user: 1004:1004
+    restart: always
+    command: ["--network=goerli",
+              "--data-path=/lw/data/teku",
+              "--ee-endpoint=http://geth_node:8551",
+              "--initial-state=https://goerli.checkpoint-sync.ethdevops.io/eth/v2/debug/beacon/states/finalized",
+              "--ee-jwt-secret-file=jwtsecret",
+              "--p2p-port=9000"]
+    depends_on:
+      - geth_node
+    volumes:
+      - ./teku:/lw/data/teku
+      - /lw/data/jwtsecret:/opt/teku/jwtsecret
+    ports:
+      # Map the p2p port(9000) and REST API port(5051)
+      - "9000:9000/tcp"
+      - "9000:9000/udp"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
